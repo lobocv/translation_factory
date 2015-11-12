@@ -1,9 +1,9 @@
 __author__ = 'clobo'
 
-from openpyxl import load_workbook
 from datetime import datetime
 import re
 import os
+import csv
 import sys
 import argparse
 
@@ -43,69 +43,17 @@ def csv_to_po(csv_path, po_path):
         if csv_path.endswith('.csv'):
             # Open the file writer and file reader
             with open(csv_path, 'r') as csvFile:
+                csv_reader = csv.reader(csvFile)
+                headers = csv_reader.next()
 
                 # Write the information to the file.
-                while True:
-                    newLine = csvFile.readline()
+                for row in csv_reader:
+                    message, translation = row[:2]
+                    poFile.write('msgid "%s"\n' % message)
+                    poFile.write('msgstr "%s"\n\n' % translation)
 
-                    # If the .csv file is empty then exit the loop.
-                    if newLine == '':
-                        break
-
-                    # Store the identifier (msgId).
-                    # Note: When there is a comma in the sentence the first part of the .csv
-                    # will be encased in double quotes.
-                    if newLine.startswith('"'):
-                        msgId = newLine[:newLine.find('"', 1) + 1] + '\n'
-                        newLine = newLine[newLine.find('"', 1) + 2:]
-                    else:
-                        msgId = '"' + newLine[:newLine.find(',')] + '"\n'
-                        newLine = newLine[newLine.find(',') + 1:]
-
-                    # Store the translation (msgStr).
-                    # Note: When there is a comma in the sentence the first part of the .csv
-                    # will be encased in double quotes.
-                    if newLine.startswith('"'):
-                        msgStr = newLine[:newLine.find('"') + 1] + '\n'
-                        newLine = newLine[newLine.find('"') + 2:]
-                    else:
-                        msgStr = '"' + newLine[:newLine.find(',')] + '"\n'
-                        newLine = newLine[newLine.find(',') + 1:]
-
-                    # Store the translators notes.
-                    if newLine.startswith('"'):
-                        notes = newLine[:newLine.find('"') + 1] + '\n'
-                        newLine = newLine[newLine.find('"') + 2:]
-                    else:
-                        notes = newLine[:newLine.find(',')] + '\n'
-                        newLine = newLine[newLine.find(',') + 1:]
-
-                    # Write the information to the file.
-                    poFile.write('#: ' + newLine)
-                    poFile.write('# ' + notes)
-                    poFile.write('msgid ' + msgId)
-                    poFile.write('msgstr ' + msgStr)
-
-                    # This newline character needs to be added for proper spacing.
-                    poFile.write('\n')
-
-        elif csv_path.endswith('.xlsx'):
-            # Open the xlsx workbook
-            wb = load_workbook(csv_path)
-            ws = wb.active
-
-            for row in ws.rows[1:]:
-                values = ['', '', '', '']
-                for i in range(4):
-                    values[i] = row[i].value
-                    if values[i] == None:
-                        values[i] = ''
-
-                poFile.write('#: "' + values[3] + '"\n')
-                poFile.write('# "' + values[2] + '"\n')
-                poFile.write('msgid "' + values[0] + '"\n')
-                poFile.write('msgstr "' + values[1] + '"\n')
-                poFile.write('\n')
+        else:
+            return False
 
     return True
 
