@@ -11,11 +11,9 @@ from tags import extract_tags, test_tag_redundancy
 from po_to_csv import po_to_csv
 from csv_to_po import csv_to_po
 
-LOCALE_CODES = {'Spanish': 'es_ES', 'German': 'de_DE', 'French': 'fr_FR'}
-
 
 def build(directory, application_name, locale_codes_dict, build_dir, include_patterns=None, exclude_patterns=None,
-          clean=False):
+          clean=True):
 
     """
     1. Extract tags into .po
@@ -24,18 +22,18 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
     4. Convert to .po
     5. Compile .po
 
-    :param directory:
-    :param application_name:
-    :param locale_codes_dict:
-    :param build_dir:
-    :param include_patterns:
-    :param exclude_patterns:
-    :param clean:
-    :return:
+    :param directory: Directory to recursively search for tags
+    :param application_name: Name of the application being translated
+    :param locale_codes_dict: Dictionary of language: locale_code for languages that require translating
+    :param build_dir: Directory to build to
+    :param include_patterns: regex patterns of files to include in search for tags
+    :param exclude_patterns: regex patterns of files to exclude in search for tags
+    :param clean: clean intermediate files
+    :return: Success or fail
     """
 
-
     print 'Building translations for %s' % application_name
+
     if not os.path.isdir(build_dir):
         logging.info('Creating build directory: %s' % build_dir)
         os.makedirs(build_dir)
@@ -47,11 +45,13 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
     if os.path.isfile(po_template):
         os.remove(po_template)
 
+    print 'Extracting tags.. this may take several minutes.'
+
     po_template = extract_tags(directories=directory,
                                pofile_path=os.path.join(build_dir, 'messages.po'),
                                include_patterns=include_patterns,
                                exclude_patterns=exclude_patterns)
-
+    files_to_clean = [po_template]
     if po_template is None:
         logging.error('Translation build failed at extracting tags. Aborting.')
         return False
@@ -62,6 +62,8 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
         logging.error(e)
 
     csv_template = po_to_csv(po_template, os.path.join(build_dir, 'messages.csv'))
+    files_to_clean.append(csv_template)
+
     if csv_template is None:
         logging.error('Translation build failed at converting to csv. Aborting.')
         return False
@@ -79,6 +81,7 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
         if os.path.isfile(locale_csv_path):
             # Rename the populated csv that already exists to a temporary file
             os.rename(locale_csv_path, locale_csv_path + '.temp')
+            files_to_clean.append(locale_csv_path + '.temp')
             # Copy the template (which may have more/newer entries than the existing populated csv)
             shutil.copy2(csv_template, locale_csv_path)
             # Merge the existing csv into the template to ensure the new entries are transferred
@@ -98,10 +101,22 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
         locale_po_file = os.path.join(locale_dir, application_name + '.po')
         csv_to_po(locale_csv_path, locale_po_file)
 
-    if clean:
-        os.remove(po_template)
-        os.remove(csv_template)
+        print 'Compiling po file..'
+        if not os.path.isdir(os.path.join(locale_dir, 'LC_MESSAGES')):
+            os.makedirs(os.path.join(locale_dir, 'LC_MESSAGES'))
+        ec = os.system("msgfmt -o {0}/LC_MESSAGES/{1}.mo {0}/{1}.po".format(locale_dir, application_name))
+        if ec != 0:
+            print 'Compiling failed. Please ensure msgfmt is installed.'
 
+    if clean:
+        print 'Cleaning files..'
+        for _f in files_to_clean:
+            try:
+                os.remove(_f)
+            except OSError as e:
+                logging.error(e)
+
+    return True
 
 def merge_csv(from_file, into_file):
     """
