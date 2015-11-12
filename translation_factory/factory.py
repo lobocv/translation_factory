@@ -13,7 +13,7 @@ from csv_to_po import csv_to_po
 
 
 def build(directory, application_name, locale_codes_dict, build_dir, include_patterns=None, exclude_patterns=None,
-          clean=True):
+          clean=True, src_lang='python'):
 
     """
     1. Extract tags into .po
@@ -50,7 +50,8 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
     po_template = extract_tags(directories=directory,
                                pofile_path=os.path.join(build_dir, 'messages.po'),
                                include_patterns=include_patterns,
-                               exclude_patterns=exclude_patterns)
+                               exclude_patterns=exclude_patterns,
+                               src_lang='python')
     files_to_clean = [po_template]
     if po_template is None:
         logging.error('Translation build failed at extracting tags. Aborting.')

@@ -8,13 +8,14 @@ import logging
 import re
 
 
-def extract_tags(directories, pofile_path, include_patterns=None, exclude_patterns=None):
+def extract_tags(directories, pofile_path, include_patterns=None, exclude_patterns=None, src_lang='python'):
     """
     Recursively iterate through directories and extract gettext tags.
     :param directories: Directory or list of directories to iterate through
     :param pofile_path: Path to the write the po file to
     :param include_patterns: regex patterns of files to include
     :param exclude_patterns: regex patterns of files to exclude
+    :param src_lang: language of the source files (defaults to python)
     :return: path to the po file
     """
     if isinstance(directories, basestring):
@@ -47,7 +48,7 @@ def extract_tags(directories, pofile_path, include_patterns=None, exclude_patter
                 if do_call:
 
                     if os.path.isfile(pofile_path + '.po'):
-                        call_args = ('xgettext', fullpath, '--join-existing', '-L', 'python', '--default-domain=%s' % pofile_path)
+                        call_args = ('xgettext', fullpath, '--join-existing', '-L', src_lang, '--default-domain=%s' % pofile_path)
                         with open(pofile_path + '.po', 'r') as _po:
                             po_lines = _po.readlines()
 
@@ -60,7 +61,7 @@ def extract_tags(directories, pofile_path, include_patterns=None, exclude_patter
 
                     else:
                         # On the first call
-                        call_args = ('xgettext', fullpath, '-L', 'python', '--default-domain=%s' % pofile_path)
+                        call_args = ('xgettext', fullpath, '-L', src_lang, '--default-domain=%s' % pofile_path)
                     logging.debug('Searching %s' % fullpath)
                     result = subprocess.call(call_args, stdout=sys.stdout, stderr=sys.stderr)
 
