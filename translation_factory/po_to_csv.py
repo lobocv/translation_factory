@@ -5,6 +5,7 @@ import sys
 import csv
 import argparse
 
+from itertools import chain
 
 def po_to_csv(po_path, csv_path):
     """
@@ -27,7 +28,7 @@ def po_to_csv(po_path, csv_path):
         with open(csv_path, 'w') as _csv:
             csvFile = csv.writer(_csv)
             append_to = None
-            for line in poFile:
+            for line in chain(poFile, '\n'):
                 if line.startswith('msgstr'):
                     append_to = msgstr
                 elif line.startswith('msgid'):
