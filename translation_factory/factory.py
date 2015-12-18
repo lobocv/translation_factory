@@ -13,7 +13,7 @@ from csv_to_po import csv_to_po
 
 
 def build(directory, application_name, locale_codes_dict, build_dir, include_patterns=None, exclude_patterns=None,
-          clean=True, src_lang='python', file_name=None):
+          clean=True, src_lang='python', mo_name=None):
 
     """
     1. Extract tags into .po
@@ -33,8 +33,8 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
     """
 
     print 'Building translations for %s' % application_name
-    if file_name is None:
-        file_name = application_name
+    if mo_name is None:
+        mo_name = application_name
     if not os.path.isdir(build_dir):
         logging.info('Creating build directory: %s' % build_dir)
         os.makedirs(build_dir)
@@ -100,13 +100,14 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
             print "{} entries found in {}.".format(merges, existing_translations)
 
         print 'Generating po file..'
-        locale_po_file = os.path.join(locale_dir, application_name + ' - %s.po' % locale)
+        po_name = application_name + ' - %s.po' % locale
+        locale_po_file = os.path.join(locale_dir, po_name)
         csv_to_po(locale_csv_path, locale_po_file)
 
         print 'Compiling po file..'
         if not os.path.isdir(os.path.join(locale_dir, 'LC_MESSAGES')):
             os.makedirs(os.path.join(locale_dir, 'LC_MESSAGES'))
-        ec = os.system("msgfmt -o {0}/LC_MESSAGES/{2}.mo {0}/{2}.po".format(locale_dir, application_name, file_name))
+        ec = os.system("msgfmt -o '{0}/LC_MESSAGES/{1}.mo' '{0}/{2}'".format(locale_dir, mo_name, po_name))
         if ec != 0:
             print 'Compiling failed. Please ensure msgfmt is installed.'
 
@@ -174,4 +175,4 @@ if __name__ == '__main__':
           '/home/local/SENSOFT/clobo/projects/lmx/lib/PygameWidgets/PygameWidgets/resources/translations',
           include_patterns=["(.+).py$"],
           exclude_patterns=[".*eventdispatcher.*"],
-          file_name='LMX200')
+          mo_name='LMX200')
