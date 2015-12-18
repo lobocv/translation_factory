@@ -42,12 +42,11 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
         logging.info('Build directory exists: %s' % build_dir)
         logging.info('Translation tables will be updated and merged whenever possible using existing tables')
 
+    # Search through the source code and find all the tags to put into a po file
     po_template = os.path.join(build_dir, 'messages.po')
     if os.path.isfile(po_template):
         os.remove(po_template)
-
     print 'Extracting tags.. this may take several minutes.'
-
     po_template = extract_tags(directories=directory,
                                pofile_path=os.path.join(build_dir, 'messages.po'),
                                include_patterns=include_patterns,
@@ -57,18 +56,30 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
     if po_template is None:
         logging.error('Translation build failed at extracting tags. Aborting.')
         return False
+
+    # Go through the template and check for any redundancies in the tags
+    # This doesn't fix anything, just notifies you to manually change the tags.
     try:
         redundancy_warnings = test_tag_redundancy(po_template)
     except Exception as e:
         print 'Tag redundancy check failed. See log for details.'
         logging.error(e)
 
+    # Conver the po template into a csv for easier modification / comparison
     csv_template = po_to_csv(po_template, os.path.join(build_dir, 'messages.csv'))
     files_to_clean.append(csv_template)
-
     if csv_template is None:
         logging.error('Translation build failed at converting to csv. Aborting.')
         return False
+
+    # For each language we want to generate a translation for, create a copy of the po template,
+    # then fill the template with any words that have already been translated in previous po files.
+    # After merging the po files, compile the merged po into the mo file
+    #
+    # Note:
+    # Tags that have no translations will be blank in the csv file, it is up to you to fill this csv
+    # in place. Once you do that, run this same script again and it will compile the added phrases into
+    # the mo.
 
     for locale, code in locale_codes_dict.iteritems():
         logging.info('Creating translation for locale {} - {}'.format(locale, code))
@@ -121,6 +132,7 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
 
     return True
 
+
 def merge_csv(from_file, into_file):
     """
     Merge translations from existing from_file csv into into_file.
@@ -163,16 +175,11 @@ if __name__ == '__main__':
     logging.info('test')
     locale_code_dict = {'Spanish': 'es_ES', 'German': 'de_DE', 'French': 'fr_FR'}
 
-    # build("/home/local/SENSOFT/clobo/projects/conquest",
-    #       'PygameConquest',
-    #       locale_code_dict,
-    #       '/home/local/SENSOFT/clobo/temp/translation_build',
-    #       include_patterns=["(.+).py$"])
-
-    build("/home/local/SENSOFT/clobo/projects/lmx",
-          'PygameLMX',
-          locale_code_dict,
-          '/home/local/SENSOFT/clobo/projects/lmx/lib/PygameWidgets/PygameWidgets/resources/translations',
+    build_dir='/home/local/SENSOFT/clobo/projects/lmx/lib/PygameWidgets/PygameWidgets/resources/translations'
+    build(directory="/home/local/SENSOFT/clobo/projects/lmx",
+          application_name='PygameLMX',
+          locale_codes_dict=locale_code_dict,
+          build_dir=build_dir,
           include_patterns=["(.+).py$"],
           exclude_patterns=[".*eventdispatcher.*"],
           mo_name='LMX200')
