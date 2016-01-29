@@ -167,19 +167,3 @@ def merge_csv(from_file, into_file):
             csv_writer.writerow((phrase, trans))
 
     return merge_entries
-
-if __name__ == '__main__':
-
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logging.info('test')
-    locale_code_dict = {'Spanish': 'es_ES', 'German': 'de_DE', 'French': 'fr_FR'}
-
-    build_dir='/home/local/SENSOFT/clobo/projects/lmx/lib/PygameWidgets/PygameWidgets/resources/translations'
-    build(directory="/home/local/SENSOFT/clobo/projects/lmx",
-          application_name='PygameLMX',
-          locale_codes_dict=locale_code_dict,
-          build_dir=build_dir,
-          include_patterns=["(.+).py$"],
-          exclude_patterns=[".*eventdispatcher.*"],
-          mo_name='LMX200')
