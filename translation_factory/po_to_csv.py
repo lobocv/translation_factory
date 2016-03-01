@@ -7,7 +7,8 @@ import argparse
 
 from itertools import chain
 
-def po_to_csv(po_path, csv_path):
+
+def po_to_csv(po_path, csv_path, sort=True):
     """
     Convert the po file to a csv file that can be sent to the translator
     :param po_path: path to the po file
@@ -23,16 +24,19 @@ def po_to_csv(po_path, csv_path):
 
     msgid = []
     msgstr = []
+    msgid_sorted = []
     count = 0
     with open(po_path, 'r') as poFile:
         with open(csv_path, 'w') as _csv:
             csvFile = csv.writer(_csv)
             append_to = None
             for line in chain(poFile, '\n'):
+                # Decide if the line is part of the phrase or the translation and assign it to the corresponding list
                 if line.startswith('msgstr'):
                     append_to = msgstr
                 elif line.startswith('msgid'):
                     append_to = msgid
+
                 if append_to is not None:
                     append_to.append(line)
 
@@ -41,19 +45,23 @@ def po_to_csv(po_path, csv_path):
                     count += 1
                     if count == 1:
                         pass
-                        # Header info from po file
-                        # for t in msgstr[1:]:
-                        #     t = t.replace(';', '')
-                        #     csvFile.writerow((t.strip('\\n"\n'),))
                     else:
                         if count == 2:
                             csvFile.writerow(('Original Text', 'Translation', 'Additional Comments'))
                         t = ''.join([m.strip('"') for m in msgid])
                         t = t.replace('msgid "', '')
                         t = t.replace('"\n', '')
-                        csvFile.writerow((t, '', '', '' ))
+                        if sort:
+                            msgid_sorted.append(t)
+                        else:
+                            csvFile.writerow((t, '', '', '' ))
                     del msgid[:]
                     del msgstr[:]
+
+            if sort:
+                msgid_sorted.sort()
+                for t in msgid_sorted:
+                    csvFile.writerow((t, '', '', '' ))
 
     return csv_path
 

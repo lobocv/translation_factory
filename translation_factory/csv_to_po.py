@@ -8,7 +8,7 @@ import sys
 import argparse
 
 
-def csv_to_po(csv_path, po_path):
+def csv_to_po(csv_path, po_path, sort=True):
     if not (csv_path.endswith('.csv') or csv_path.endswith('.xlsx')):
         raise ValueError('csv_path must be have extension .csv or .xlsx')
 
@@ -45,9 +45,12 @@ def csv_to_po(csv_path, po_path):
             with open(csv_path, 'r') as csvFile:
                 csv_reader = csv.reader(csvFile)
                 headers = csv_reader.next()
-
+                if sort:
+                    po_items = sorted((row[:2] for row in csv_reader), key=lambda x: x[0])
+                else:
+                    po_items = csv_reader
                 # Write the information to the file.
-                for row in csv_reader:
+                for row in po_items:
                     message, translation = row[:2]
                     poFile.write('msgid "%s"\n' % message)
                     poFile.write('msgstr "%s"\n\n' % translation)

@@ -13,7 +13,7 @@ from csv_to_po import csv_to_po
 
 
 def build(directory, application_name, locale_codes_dict, build_dir, include_patterns=None, exclude_patterns=None,
-          clean=True, src_lang='python', mo_name=None):
+          clean=True, src_lang='python', mo_name=None, sort_messages=True):
 
     """
     1. Extract tags into .po
@@ -66,7 +66,7 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
         logging.error(e)
 
     # Conver the po template into a csv for easier modification / comparison
-    csv_template = po_to_csv(po_template, os.path.join(build_dir, 'messages.csv'))
+    csv_template = po_to_csv(po_template, os.path.join(build_dir, 'messages.csv'), sort=sort_messages)
     files_to_clean.append(csv_template)
     if csv_template is None:
         logging.error('Translation build failed at converting to csv. Aborting.')
@@ -113,7 +113,7 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
         print 'Generating po file..'
         po_name = application_name + ' - %s.po' % locale
         locale_po_file = os.path.join(locale_dir, po_name)
-        csv_to_po(locale_csv_path, locale_po_file)
+        csv_to_po(locale_csv_path, locale_po_file, sort=sort_messages)
 
         print 'Compiling po file..'
         if not os.path.isdir(os.path.join(locale_dir, 'LC_MESSAGES')):
