@@ -146,7 +146,7 @@ def merge_csv(from_file, into_file):
     merge_entries = 0
     with open(into_file, 'r') as f1:
         f1_reader = csv.reader(f1)
-        header1 = f1.readline()
+        header1 = f1_reader.next()
         for line1 in f1_reader:
             phrase, translation = line1[:2]
             cells[phrase] = translation
@@ -161,9 +161,11 @@ def merge_csv(from_file, into_file):
                 cells[phrase] = translation
 
     with open(into_file, 'w') as f1:
-        f1.write(header1)
         csv_writer = csv.writer(f1)
+        csv_writer.writerow(header1)
+        row = [''] * len(header1)
         for phrase, trans in cells.iteritems():
-            csv_writer.writerow((phrase, trans))
+            row[0], row[1] = phrase, trans
+            csv_writer.writerow(row)
 
     return merge_entries
