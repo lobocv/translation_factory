@@ -1,0 +1,9 @@
+{
+  "build_dir": "absolute_path_containing_language_folders",
+  "directory": "absolute_path_containing_code_to_translate",
+  "application_name": "MyApplication",
+  "locale_codes_dict": {"Spanish": "es_ES", "German": "de_DE", "French": "fr_FR"},
+  "include_patterns": ["(.+).py$"],
+  "exclude_patterns": [".*eventdispatcher.*"],
+  "mo_name": "MyApplication"
+}
