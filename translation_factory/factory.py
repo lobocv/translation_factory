@@ -10,6 +10,7 @@ import csv
 from tags import extract_tags, test_tag_redundancy
 from po_to_csv import po_to_csv
 from csv_to_po import csv_to_po
+from combine_tables import create_master_table
 
 
 def build(directory, application_name, locale_codes_dict, build_dir, include_patterns=None, exclude_patterns=None,
@@ -121,6 +122,9 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
         ec = os.system("msgfmt -o '{0}/LC_MESSAGES/{1}.mo' '{0}/{2}'".format(locale_dir, mo_name, po_name))
         if ec != 0:
             print 'Compiling failed. Please ensure msgfmt is installed.'
+
+    print 'Creating master table.'
+    create_master_table(build_dir, application_name, locale_codes_dict)
 
     if clean:
         print 'Cleaning files..'
