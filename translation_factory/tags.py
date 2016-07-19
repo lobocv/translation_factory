@@ -85,19 +85,39 @@ def test_tag_redundancy(pofile_path):
     re_empty_bracket = re.compile(r'\".*\{\}.*\"$')
     re_new_line_char = re.compile(r'\".*\\n\"$')
     re_ends_with_colon = re.compile(r'\".*:\"$')
+    msgstr, msgid = [], []
+    append_to = None
     with open(pofile_path, 'r') as _po:
         for ii, line in enumerate(_po):
-            if re.findall(re_empty_bracket, line):
-                print "Empty placeholder in line {}: {}".format(ii, line.strip())
-                warnings += 1
-            if re.findall(re_new_line_char, line):
-                print "New line character found in line {}: {}".format(ii, line.strip())
-                warnings += 1
-            if re.findall(re_ends_with_colon, line):
-                print "Colon detected at the end of line {}: {}".format(ii, line.strip())
-                warnings += 1
+            if line.startswith('msgstr'):
+                append_to = msgstr
+            elif line.startswith('msgid'):
+                append_to = msgid
 
-    print "%d Warnings found." % warnings
+            if append_to is not None:
+                append_to.append(line)
+
+            if line == '\n':
+                append_to = None
+
+                _msgid = ''.join(msgid)
+                _msgstr = ''.join(msgstr)
+
+                if _msgid != 'msgid ""\n':
+                    for txt in (_msgid, _msgstr):
+                        if re.findall(re_empty_bracket, txt):
+                            print "Empty placeholder in line {}: {}".format(ii, txt.strip())
+                            warnings += 1
+                        if re.findall(re_new_line_char, txt):
+                            print "New line character found in line {}: {}".format(ii, txt.strip())
+                            warnings += 1
+                        if re.findall(re_ends_with_colon, txt):
+                            print "Colon detected at the end of line {}: {}".format(ii, txt.strip())
+                            warnings += 1
+                del msgid[:]
+                del msgstr[:]
+
+    print "%d Redundancy warnings found." % warnings
     return warnings
 
 if __name__ == '__main__':
