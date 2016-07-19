@@ -7,42 +7,32 @@ logger.setLevel(logging.INFO)
 logging.info('Translation Factory build started')
 
 
-locale_code_dict = {'Spanish': 'es_ES', 'German': 'de_DE', 'French': 'fr_FR'}
+locale_code_dict = {
+                    'Spanish': 'es_ES',
+                    'German': 'de_DE',
+                    'French': 'fr_FR',
+                    'Czech': 'cs_CZ',
+                    'Polish': 'pl_PL',
+                    'Dutch': 'nl_NL',
+                    'Italian': 'it_IT',
+                    'Turkish': 'tr_TR',
+                    'Greek': 'el_GR',
+                    'Russian': 'ru_RU',
+                    'Bulgarian': 'bg_BG',
+                    'Romanian': 'ro_RO',
+                    'Hungarian': 'hu_HU',
+                    'Simplified Chinese': 'Simplified Chinese'
+                    }
 
-BUILD_CONQUEST = 0
-BUILD_LMX200_RD1500 = 1
-BUILD_LMX100_RD1100 = 0
 
 
-if BUILD_CONQUEST:
-    build_dir = '/home/local/SENSOFT/clobo/projects/conquestV2/lib/PygameWidgets/PygameWidgets/resources/translations'
-    source_dir = "/home/local/SENSOFT/clobo/projects/conquestV2",
-    build(directory=source_dir,
-          application_name='Conquest 100',
-          locale_codes_dict=locale_code_dict,
-          build_dir=build_dir,
-          include_patterns=["(.+).py$"],
-          exclude_patterns=[".*eventdispatcher.*"],
-          mo_name='Conquest 100')
+build_dir = 'path_to_place_output_translations'
+source_dir = "path_to_grab tags_from",
 
-if BUILD_LMX200_RD1500:
-    build_dir = '/home/local/SENSOFT/clobo/projects/lmx/lib/PygameWidgets/PygameWidgets/resources/translations'
-    source_dir = "/home/local/SENSOFT/clobo/projects/lmx"
-    build(directory=source_dir,
-          application_name='LMX200',
-          locale_codes_dict=locale_code_dict,
-          build_dir=build_dir,
-          include_patterns=["(.+).py$"],
-          exclude_patterns=[".*eventdispatcher.*"],
-          mo_name='LMX200')
-
-if BUILD_LMX100_RD1100:
-    build_dir = '/home/local/SENSOFT/clobo/projects/lmx/lib/PygameWidgets/PygameWidgets/resources/translations'
-    source_dir = "/home/local/SENSOFT/clobo/projects/lmx"
-    build(directory=source_dir,
-          application_name='LMX100',
-          locale_codes_dict=locale_code_dict,
-          build_dir=build_dir,
-          include_patterns=["(.+).py$"],
-          exclude_patterns=[".*eventdispatcher.*"],
-          mo_name='LMX100')
+build(directory=source_dir,
+      application_name='MyApp',
+      locale_codes_dict=locale_code_dict,
+      build_dir=build_dir,
+      include_patterns=["(.+).py$"],
+      exclude_patterns=[".*eventdispatcher.*"],
+      mo_name='MyApp')
