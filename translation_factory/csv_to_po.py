@@ -7,11 +7,13 @@ import csv
 import sys
 import argparse
 
+_re_python_str_placeholder = re.compile('%\d?\.?\d?[sbcdoxXneEfFgG]|{[A-z,0-9]*:?\d*[sbcdoxXneEfFgG]?}')
 
-def csv_to_po(csv_path, po_path, sort=True):
+
+def csv_to_po(csv_path, po_path, sort=True, src_lang='python'):
     if not (csv_path.endswith('.csv') or csv_path.endswith('.xlsx')):
         raise ValueError('csv_path must be have extension .csv or .xlsx')
-
+    place_holder_errors = 0
     po_path = os.path.splitext(po_path)[0] + '.po'
 
     try:
@@ -52,9 +54,21 @@ def csv_to_po(csv_path, po_path, sort=True):
                 # Write the information to the file.
                 for row in po_items:
                     message, translation = row[:2]
+                    if src_lang == 'python':
+                        if translation:
+                            mph = set(_re_python_str_placeholder.findall(message))
+                            tph = set(_re_python_str_placeholder.findall(translation))
+                            if len(mph.symmetric_difference(tph)) > 0:
+                                place_holder_errors += 1
+                                print 'Warning. Placeholders do not match in %s translation table!' % language
+                                print message + '\n' + translation
+                                print 'Errors: %s' % ','.join(tph.difference(mph)) + '\n'
+
                     poFile.write('msgid "%s"\n' % message)
                     poFile.write('msgstr "%s"\n\n' % translation)
 
+                if src_lang == 'python':
+                    print '%d Place holder errors were found.' % place_holder_errors
         else:
             return False
 
