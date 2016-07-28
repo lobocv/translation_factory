@@ -1,6 +1,7 @@
 import os
 import csv
 import itertools
+from collections import defaultdict
 
 
 def create_master_table(build_dir, application_name, locale_codes_dict, fmt='xlsx', outfile=None):
@@ -24,6 +25,7 @@ def create_master_table(build_dir, application_name, locale_codes_dict, fmt='xls
             header = csv_readers[lang_header].next()
             print '%s CSV found.' % lang_header
 
+    missing = defaultdict(dict)
     print 'Combining tables for %s into a master table' % ', '.join(open_files.iterkeys())
     with open(outfile, 'w') as _csv:
         csvFile = csv.writer(_csv)
@@ -38,6 +40,8 @@ def create_master_table(build_dir, application_name, locale_codes_dict, fmt='xls
                 original, translated, comment = csv_reader.next()
             except StopIteration as e:
                 break
+            if translated == '':
+                missing[original].update({lang: original})
             if row.get('Original Text', None) is None:
                 # If this was the first language in the iteration for this row, set it's original text column
                 row['Original Text'] = original
@@ -65,6 +69,13 @@ def create_master_table(build_dir, application_name, locale_codes_dict, fmt='xls
 
         for f in open_files.itervalues():
             f.close()
+
+        with open(os.path.join(build_dir, 'missing_translations.' + fmt), 'w') as f:
+            csvFile = csv.writer(f)
+            csvFile.writerow(['Original Text'] + open_files.keys())
+            for phrase, miss in sorted(missing.iteritems()):
+                csvFile.writerow([phrase] + [miss.get(l, '') for l in open_files.iterkeys()])
+
         print 'Master table is ready at %s' % outfile
 
 
