@@ -31,7 +31,7 @@ source_dir = "path_to_grab tags_from",
 
 build(directory=source_dir,
       application_name='MyApp',
-      locale_codes_dict=locale_code_dict,
+      locale_codes=locale_code_dict,
       build_dir=build_dir,
       include_patterns=["(.+).py$"],
       exclude_patterns=[".*eventdispatcher.*"],

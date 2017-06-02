@@ -4,7 +4,7 @@ import itertools
 from collections import defaultdict
 
 
-def create_master_table(build_dir, application_name, locale_codes_dict, fmt='xlsx', outfile=None):
+def create_master_table(build_dir, application_name, locale_codes, fmt='xlsx', outfile=None):
 
     if fmt not in ('xlsx', 'csv'):
         raise ValueError('format argument must either be xlsx or csv')
@@ -16,7 +16,7 @@ def create_master_table(build_dir, application_name, locale_codes_dict, fmt='xls
     csv_readers = {}
     # Find all the language CSV files and open them
     print 'Searching for CSV tables.'
-    for lang, locale_code in locale_codes_dict.iteritems():
+    for lang, locale_code in locale_codes:
         csv_path = os.path.join(build_dir, locale_code, "{} - {}.csv".format(application_name, lang))
         if os.path.isfile(csv_path):
             lang_header = "%s (%s)" % (lang, locale_code)

@@ -13,8 +13,8 @@ from csv_to_po import csv_to_po
 from combine_tables import create_master_table
 
 
-def build(directory, application_name, locale_codes_dict, build_dir, include_patterns=None, exclude_patterns=None,
-          clean=True, src_lang='python', mo_name=None, sort_messages=True):
+def build(directory, application_name, locale_codes, build_dir, include_patterns=None, exclude_patterns=None,
+          clean=True, src_lang='python', mo_name=None, sort_messages=True, **kwargs):
 
     """
     1. Extract tags into .po
@@ -25,7 +25,7 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
 
     :param directory: Directory to recursively search for tags
     :param application_name: Name of the application being translated
-    :param locale_codes_dict: Dictionary of language: locale_code for languages that require translating
+    :param locale_codes: List of tuples of the form (language, locale_code for languages that require translating)
     :param build_dir: Directory to build to
     :param include_patterns: regex patterns of files to include in search for tags
     :param exclude_patterns: regex patterns of files to exclude in search for tags
@@ -82,7 +82,7 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
     # in place. Once you do that, run this same script again and it will compile the added phrases into
     # the mo.
 
-    for locale, code in locale_codes_dict.iteritems():
+    for locale, code in locale_codes:
         logging.info('Creating translation for locale {} - {}'.format(locale, code))
         # Create a directory for the locale
         locale_dir = os.path.join(build_dir, code)
@@ -124,7 +124,7 @@ def build(directory, application_name, locale_codes_dict, build_dir, include_pat
             print 'Compiling failed. Please ensure msgfmt is installed.'
 
     print 'Creating master table.'
-    create_master_table(build_dir, application_name, locale_codes_dict)
+    create_master_table(build_dir, application_name, locale_codes)
 
     if clean:
         print 'Cleaning files..'
