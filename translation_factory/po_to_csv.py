@@ -55,7 +55,7 @@ def po_to_csv(po_path, csv_path, sort=True):
     po_path = os.path.splitext(po_path)[0] + '.po'
 
     if not os.path.isfile(po_path):
-        return ValueError('No po file "%s" exists' % po_path)
+        raise ValueError('No po file "%s" exists' % po_path)
 
     msgid_sorted = []
     with open(csv_path, 'w') as _csv:
