@@ -11,7 +11,7 @@ import re
 def extract_tags(directories, pofile_path, include_patterns=None, exclude_patterns=None, src_lang='python'):
     """
     Recursively iterate through directories and extract gettext tags.
-    :param directories: Directory or list of directories to iterate through
+    :param directories: Directory to iterate through (recursively) or list of directories (non recursive) 
     :param pofile_path: Path to the write the po file to
     :param include_patterns: regex patterns of files to include
     :param exclude_patterns: regex patterns of files to exclude
@@ -19,7 +19,9 @@ def extract_tags(directories, pofile_path, include_patterns=None, exclude_patter
     :return: path to the po file
     """
     if isinstance(directories, basestring):
-       directories = (directories, )
+        directories = (directories, )
+
+    recursive = len(directories) == 1
 
     pofile_path = os.path.splitext(pofile_path)[0]
     for directory in directories:
@@ -65,6 +67,9 @@ def extract_tags(directories, pofile_path, include_patterns=None, exclude_patter
                     logging.debug('Searching %s' % fullpath)
                     result = subprocess.call(call_args, stdout=sys.stdout, stderr=sys.stderr)
 
+            if not recursive:
+                # Do not walk into sub-directories
+                break
         return pofile_path + '.po'
 
 
