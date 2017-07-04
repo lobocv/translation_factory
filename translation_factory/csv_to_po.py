@@ -23,9 +23,9 @@ def csv_to_po(csv_path, po_path, sort=True, src_lang='python'):
     with open(po_path, 'w') as poFile:
         # Add header information.
         poFile.write(''
-                     '# GENERATED .po FILE FROM TABLE\n'
+                     '# GENERATED .po FILE FROM translation_factory\n'
+                     '# https://github.com/lobocv/translation_factory\n'
                      '# Copyright (C) 2015 Calvin Lobo. All rights reserved\n'
-                     '# Calvin Lobo <calvinvlobo@gmail.com>, 2015\n'
                      '#\n'
                      'msgid ""\n'
                      'msgstr ""\n'
