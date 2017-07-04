@@ -12,6 +12,25 @@ from po_to_csv import po_to_csv
 from csv_to_po import csv_to_po
 from combine_tables import create_master_table
 
+try:
+    import arabic_reshaper
+    from bidi.algorithm import get_display
+
+    def ARABIC_TRANSFORM_LIBRARY(text):
+        t = text.decode('utf-8')
+        # Converts individual characters to their word respresentation
+        reshaped = arabic_reshaper.reshape(t)
+        # To prevent escaped quotes from being reversed, reverse them ahead of time so they get re-reversed
+        reshaped = reshaped.replace('\\"', '"\\')
+        reshaped = reshaped.replace("\\'", "'\\")
+        # Reverse the string (Right to Left)
+        T = get_display(reshaped)
+        converted = T.encode('utf-8')
+        return converted
+
+except ImportError as e:
+    ARABIC_TRANSFORM_LIBRARY = None
+
 
 def build(directory, application_name, locale_codes, build_dir, include_patterns=None, exclude_patterns=None,
           clean=True, src_lang='python', mo_name=None, sort_messages=True, **kwargs):
@@ -114,7 +133,17 @@ def build(directory, application_name, locale_codes, build_dir, include_patterns
         print 'Generating po file..'
         po_name = application_name + ' - %s.po' % locale
         locale_po_file = os.path.join(locale_dir, po_name)
-        csv_to_po(locale_csv_path, locale_po_file, sort=sort_messages)
+        if code in ('fa_IR', 'ar_AE'):
+            if ARABIC_TRANSFORM_LIBRARY is None:
+                print 'Warning: Cannot import arabic-reshaper or python-bidi. These libraries are required ' \
+                      'in order to reshape arabic characters into their word representation and to ' \
+                      'reverse the strings (right to left language)'
+                csv_transform = None
+            else:
+                csv_transform = ARABIC_TRANSFORM_LIBRARY
+        else:
+            csv_transform = None
+        csv_to_po(locale_csv_path, locale_po_file, sort=sort_messages, transform=csv_transform)
 
         print 'Compiling po file..'
         if not os.path.isdir(os.path.join(locale_dir, 'LC_MESSAGES')):

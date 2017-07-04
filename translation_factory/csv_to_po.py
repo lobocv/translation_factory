@@ -10,7 +10,19 @@ import argparse
 _re_python_str_placeholder = re.compile('%\d?\.?\d?[sbcdoxXneEfFgG]|{[A-z,0-9]*:?\d*[sbcdoxXneEfFgG]?}')
 
 
-def csv_to_po(csv_path, po_path, sort=True, src_lang='python'):
+def csv_to_po(csv_path, po_path, sort=True, src_lang='python', transform=None):
+    """
+    Convert a csv file into a po file.
+
+    :param csv_path: path to csv file
+    :param po_path: path to output po file
+    :param sort: sort the strings alphabetically
+    :param src_lang: source language (used to check format strings are not altered for python)
+    :param transform: function applied to csv translation before writing to po file
+                      (used for right to left / reshaped languages such as Arabic, Farsi)
+    :return:
+    """
+
     if not (csv_path.endswith('.csv') or csv_path.endswith('.xlsx')):
         raise ValueError('csv_path must be have extension .csv or .xlsx')
     place_holder_errors = 0
@@ -56,6 +68,8 @@ def csv_to_po(csv_path, po_path, sort=True, src_lang='python'):
                     message, translation = row[:2]
                     if src_lang == 'python':
                         if translation:
+                            if transform:
+                                translation = transform(translation)
                             mph = set(_re_python_str_placeholder.findall(message))
                             tph = set(_re_python_str_placeholder.findall(translation))
                             if len(mph.symmetric_difference(tph)) > 0:
