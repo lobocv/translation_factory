@@ -7,6 +7,8 @@ import glob
 import collections
 import csv
 
+from functools import partial
+
 from tags import extract_tags, test_tag_redundancy
 from po_to_csv import po_to_csv
 from csv_to_po import csv_to_po
@@ -16,15 +18,18 @@ try:
     import arabic_reshaper
     from bidi.algorithm import get_display
 
-    def ARABIC_TRANSFORM_LIBRARY(text):
+    def ARABIC_TRANSFORM(text, locale):
         t = text.decode('utf-8')
         # Converts individual characters to their word respresentation
         reshaped = arabic_reshaper.reshape(t)
         # To prevent escaped quotes from being reversed, reverse them ahead of time so they get re-reversed
         reshaped = reshaped.replace('\\"', '"\\')
         reshaped = reshaped.replace("\\'", "'\\")
-        # Reverse the string (Right to Left)
-        T = get_display(reshaped)
+        if locale == 'ar_AE':
+            # Reverse the string (Right to Left)
+            T = get_display(reshaped)
+        else:
+            T = reshaped
         converted = T.encode('utf-8')
         return converted
 
@@ -134,13 +139,13 @@ def build(directory, application_name, locale_codes, build_dir, include_patterns
         po_name = application_name + ' - %s.po' % locale
         locale_po_file = os.path.join(locale_dir, po_name)
         if code in ('fa_IR', 'ar_AE'):
-            if ARABIC_TRANSFORM_LIBRARY is None:
+            if ARABIC_TRANSFORM is None:
                 print 'Warning: Cannot import arabic-reshaper or python-bidi. These libraries are required ' \
                       'in order to reshape arabic characters into their word representation and to ' \
                       'reverse the strings (right to left language)'
                 csv_transform = None
             else:
-                csv_transform = ARABIC_TRANSFORM_LIBRARY
+                csv_transform = partial(ARABIC_TRANSFORM, locale=code)
         else:
             csv_transform = None
         csv_to_po(locale_csv_path, locale_po_file, sort=sort_messages, transform=csv_transform)
