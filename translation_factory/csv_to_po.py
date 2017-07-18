@@ -8,7 +8,7 @@ import sys
 import argparse
 
 _re_python_str_placeholder = re.compile('%\d?\.?\d?[sbcdoxXneEfFgG]|{[A-z,0-9]*:?\d*[sbcdoxXneEfFgG]?}')
-
+_re_unescaped_quotes = re.compile(r'(?<!\\)\"')
 
 def csv_to_po(csv_path, po_path, sort=True, src_lang='python', transform=None):
     """
@@ -78,8 +78,10 @@ def csv_to_po(csv_path, po_path, sort=True, src_lang='python', transform=None):
                                 print message + '\n' + translation
                                 print 'Errors: %s' % ','.join(tph.difference(mph)) + '\n'
 
+                    escaped_translation = re.sub(_re_unescaped_quotes, r'\"', translation)
+
                     poFile.write('msgid "%s"\n' % message)
-                    poFile.write('msgstr "%s"\n\n' % translation)
+                    poFile.write('msgstr "%s"\n\n' % escaped_translation)
 
                 if src_lang == 'python':
                     print '%d Place holder errors were found.' % place_holder_errors
