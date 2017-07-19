@@ -44,3 +44,6 @@ translation_factory uses xgettext to extract tags from source code. In the futur
 tool that creates .po files.
 
 translation_factory uses msgfmt to compile .po files into .mo files.
+
+For Arabic and Farsi languages, [arabic_reshaper](https://github.com/mpcabd/python-arabic-reshaper) and [python-bidi](https://github.com/MeirKriheli/python-bidi) are required to combine individual characters to their 
+word form as well as to convert to right-to-left.
