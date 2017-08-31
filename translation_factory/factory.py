@@ -9,7 +9,7 @@ import csv
 
 from functools import partial
 
-from tags import extract_tags, test_tag_redundancy
+from tags import extract_tags, test_tag_quality
 from po_to_csv import po_to_csv
 from csv_to_po import csv_to_po
 from combine_tables import create_master_table
@@ -85,7 +85,7 @@ def build(directory, application_name, locale_codes, build_dir, include_patterns
     # Go through the template and check for any redundancies in the tags
     # This doesn't fix anything, just notifies you to manually change the tags.
     try:
-        redundancy_warnings = test_tag_redundancy(po_template)
+        redundancy_warnings = test_tag_quality(po_template)
     except Exception as e:
         print 'Tag redundancy check failed. See log for details.'
         logging.error(e)

@@ -73,7 +73,7 @@ def extract_tags(directories, pofile_path, include_patterns=None, exclude_patter
         return pofile_path + '.po'
 
 
-def test_tag_redundancy(pofile_path):
+def test_tag_quality(pofile_path):
     """
     Checks several conditions to reduce redundancy in the po file:
 
@@ -89,7 +89,7 @@ def test_tag_redundancy(pofile_path):
     warnings = 0
     re_empty_bracket = re.compile(r'\".*\{\}.*\"$')
     re_new_line_char = re.compile(r'\".*\\n\"$')
-    re_ends_with_colon = re.compile(r'\".*:\"$')
+    # re_ends_with_colon = re.compile(r'\".*:\"$')
     msgstr, msgid = [], []
     append_to = None
     with open(pofile_path, 'r') as _po:
@@ -116,8 +116,8 @@ def test_tag_redundancy(pofile_path):
                         if re.findall(re_new_line_char, txt):
                             print "New line character found in line {}: {}".format(ii, txt.strip())
                             warnings += 1
-                        if re.findall(re_ends_with_colon, txt):
-                            print "Colon detected at the end of line {}: {}".format(ii, txt.strip())
+                        # if re.findall(re_ends_with_colon, txt):
+                        #     print "Colon detected at the end of line {}: {}".format(ii, txt.strip())
                             warnings += 1
                 del msgid[:]
                 del msgstr[:]
@@ -141,4 +141,4 @@ if __name__ == '__main__':
             pofile_path=args.outfile,
             include_patterns=args.include_patterns,
             exclude_patterns=args.exclude_patterns)
-    test_tag_redundancy(po_path)
+    test_tag_quality(po_path)
