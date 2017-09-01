@@ -4,11 +4,9 @@ import itertools
 from collections import defaultdict
 
 
-def create_master_table(build_dir, application_name, locale_codes, fmt='xlsx', outfile=None):
+def create_master_table(build_dir, application_name, locale_codes, outfile=None):
 
-    if fmt not in ('xlsx', 'csv'):
-        raise ValueError('format argument must either be xlsx or csv')
-
+    fmt = 'csv'
     if outfile is None:
         outfile = os.path.join(build_dir, 'all_translations.' + fmt)
 

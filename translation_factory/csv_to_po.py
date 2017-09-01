@@ -23,13 +23,13 @@ def csv_to_po(csv_path, po_path, sort=True, src_lang='python', transform=None):
     :return:
     """
 
-    if not (csv_path.endswith('.csv') or csv_path.endswith('.xlsx')):
-        raise ValueError('csv_path must be have extension .csv or .xlsx')
+    if not csv_path.endswith('.csv'):
+        raise ValueError('csv_path must be have extension .csv')
     place_holder_errors = 0
     po_path = os.path.splitext(po_path)[0] + '.po'
 
     try:
-        language = re.match(".* - (.+)\.(csv|xlsx)", csv_path).group(1)
+        language = re.match(".* - (.+)\.(csv)", csv_path).group(1)
     except IndexError:
         language = 'LANGUAGE'
     with open(po_path, 'w') as poFile:
