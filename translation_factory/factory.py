@@ -171,7 +171,7 @@ def build(directory, application_name, locale_codes, build_dir, include_patterns
     return True
 
 
-def merge_csv(from_file, into_file):
+def merge_csv(from_file, into_file, prompt_conflicts=False):
     """
     Merge translations from existing from_file csv into into_file.
 
@@ -182,6 +182,7 @@ def merge_csv(from_file, into_file):
     """
     cells = collections.OrderedDict({})
     merge_entries = 0
+    into_filename = os.path.split(into_file)[1]
     with open(into_file, 'r') as f1:
         f1_reader = csv.reader(f1)
         header1 = f1_reader.next()
@@ -189,14 +190,31 @@ def merge_csv(from_file, into_file):
             phrase, translation = line1[:2]
             cells[phrase] = translation
 
+    from_filename = os.path.split(from_file)[1]
     with open(from_file, 'r') as f2:
         header2 = f2.readline()
         csv_reader = csv.reader(f2)
         for line2 in csv_reader:
             phrase, translation = line2[:2]
-            if translation and phrase in cells and cells[phrase] == '':
-                merge_entries += 1
-                cells[phrase] = translation
+            if translation and phrase in cells:
+                if cells[phrase] == '':
+                    merge_entries += 1
+                    cells[phrase] = translation
+                elif prompt_conflicts and cells[phrase] != translation:
+                    replace = raw_input('\nThe following has mutliple differing translations phrase:\n'
+                                        'Phrase: "{phrase}"\n'
+                                        '{app1}: "{app1_trans}"\n'
+                                        '{app2}: "{app2_trans}"\n\n'
+                                        'Do you want to replace {app1} translation with {app2} (y/n)'.format(phrase=phrase,
+                                                                        app1=into_filename,
+                                                                        app1_trans=cells[phrase],
+                                                                        app2=from_filename,
+                                                                        app2_trans=translation
+                                                                        )
+                                        )
+                    if replace == 'y':
+                        merge_entries += 1
+                        cells[phrase] = translation
 
     with open(into_file, 'w') as f1:
         csv_writer = csv.writer(f1)
